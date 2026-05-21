@@ -1,0 +1,58 @@
+'''
+The given script is used to create a visit -
+'''
+
+import requests
+import json
+
+BASE_URL   = "https://test.openspecimen.org/rest/ng"
+LOGIN_NAME = ""
+PASSWORD   = ""
+DOMAIN     = "openspecimen"
+
+session = requests.Session()
+session.headers.update({"Content-Type": "application/json"})
+
+auth_response = session.post(f"{BASE_URL}/sessions", json={ 
+    "loginName": LOGIN_NAME,
+    "password":  PASSWORD,
+    "domain":    DOMAIN
+})
+    
+auth = auth_response.json()
+session.headers.update({"X-OS-API-TOKEN": auth["token"]})
+
+if auth_response.status_code == 200:
+    print("Auth Successful")
+else:
+    print("Unauth Access")
+    exit()
+
+
+visits = session.post(f"{BASE_URL}/visits",json={
+    "cprId":8005,
+    "eventId":904,
+    "eventLabel": "Baseline",   
+        "clinicalDiagnoses": [
+            "3-part fracture of surgical neck of humerus" 
+        ],
+    "activityStatus":"Active",
+    "site":"Sumit Site A",
+    "cpTitle":"TCPAPI1",
+})
+
+if visits.status_code == 200:
+    print("Successfully added visit")
+    visit_id = visits.json()["id"]
+else:
+    print("Failed to add visit")
+    print(f"Error Details: {visits.text}")
+    exit()
+
+'''
+Output - 
+
+Auth Successful
+Successfully added visit
+
+'''
